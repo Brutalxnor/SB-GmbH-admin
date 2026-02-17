@@ -1,8 +1,51 @@
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import LoginPage from '../../features/auth/pages/LoginPage';
+import { ProtectedRoute } from '../../shared/components/ProtectedRoute';
+import { Layout } from '../../shared/components/Layout';
+import DashboardPage from '../../pages/dashboard/DashboardPage';
+import BranchesPage from '../../pages/branches/BranchesPage';
+import StaffPage from '../../pages/staff/StaffPage';
+import InvoicesPage from '../../pages/invoices/InvoicesPage';
+
+const router = createBrowserRouter([
+    {
+        path: '/login',
+        element: <LoginPage />,
+    },
+    {
+        path: '/',
+        element: <ProtectedRoute />,
+        children: [
+            {
+                path: '/',
+                element: <Layout />,
+                children: [
+                    {
+                        index: true,
+                        element: <DashboardPage />,
+                    },
+                    {
+                        path: 'branches',
+                        element: <BranchesPage />,
+                    },
+                    {
+                        path: 'staff',
+                        element: <StaffPage />,
+                    },
+                    {
+                        path: 'invoices',
+                        element: <InvoicesPage />,
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        path: '*',
+        element: <Navigate to="/" replace />,
+    },
+]);
+
 export function Router() {
-    return (
-        <div className="flex items-center justify-center min-h-screen">
-            <h1 className="text-2xl font-bold">SB GmbH Admin - Feature Base Structure</h1>
-            <p className="mt-4">Welcome to the restructured dashboard.</p>
-        </div>
-    );
+    return <RouterProvider router={router} />;
 }
