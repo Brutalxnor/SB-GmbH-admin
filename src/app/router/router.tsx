@@ -26,11 +26,19 @@ const router = createBrowserRouter([
                     },
                     {
                         path: 'branches',
-                        element: <BranchesPage />,
+                        element: (
+                            <ProtectedRoute allowedRoles={['super_admin']}>
+                                <BranchesPage />
+                            </ProtectedRoute>
+                        ),
                     },
                     {
                         path: 'staff',
-                        element: <StaffPage />,
+                        element: (
+                            <ProtectedRoute allowedRoles={['super_admin']}>
+                                <StaffPage />
+                            </ProtectedRoute>
+                        ),
                     },
                     {
                         path: 'invoices',

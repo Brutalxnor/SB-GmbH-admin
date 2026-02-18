@@ -35,22 +35,49 @@ export default function LoginPage() {
             let user = null;
 
             if (rawUser) {
+                // Normalize role
+                let normalizedRole: string = (rawUser.role || rawUser.user_type || rawUser.user_level || 'user').toString();
+                normalizedRole = normalizedRole.toLowerCase();
+                if (normalizedRole === 'superadmin') normalizedRole = 'super_admin';
+                if (normalizedRole === 'administrator') normalizedRole = 'admin';
+
                 user = {
                     ...rawUser,
-                    name: rawUser.name || `${rawUser.first_name || ''} ${rawUser.last_name || ''}`.trim() || 'User'
+                    name: rawUser.name || `${rawUser.first_name || ''} ${rawUser.last_name || ''}`.trim() || 'User',
+                    role: normalizedRole,
+                    branch_id: rawUser.branch_id?.toString() || rawUser.branchId?.toString(),
+                    branch_name: rawUser.branch_name || rawUser.branchName || rawUser.branch?.name
                 };
             }
 
             if (token && user) {
                 login(token, user);
+
+                // Fetch full branch details if user has a branch_id
+                if (user.branch_id) {
+                    try {
+                        const branchResponse = await apiClient.get(`/branch/${user.branch_id}`);
+                        const branchData = branchResponse.data.data || branchResponse.data;
+                        if (branchData) {
+                            localStorage.setItem('branch_details', JSON.stringify(branchData));
+                            localStorage.setItem('branch_name', branchData.name || user.branch_name || '');
+                            localStorage.setItem('branch_id', branchData.id?.toString() || user.branch_id || '');
+                        }
+                    } catch (branchErr) {
+                        console.error('Failed to fetch full branch details:', branchErr);
+                        // We still proceed with login even if branch details fetch fails
+                    }
+                }
+
                 navigate('/');
             } else {
                 console.warn('Login successful but token or user data missing. Extracted:', { token, user });
                 setError('Received incomplete user data from server (missing token or user info).');
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Login error:', err);
-            setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+            const axiosError = err as any;
+            setError(axiosError.response?.data?.message || 'Login failed. Please check your credentials.');
         } finally {
             setIsLoading(false);
         }

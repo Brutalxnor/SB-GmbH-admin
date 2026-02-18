@@ -19,10 +19,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
     const menuItems = [
         { title: 'Dashboard', icon: LayoutDashboard, path: '/' },
-        { title: 'Branches', icon: GitBranch, path: '/branches' },
-        { title: 'Staff', icon: Users, path: '/staff' },
+        { title: 'Branches', icon: GitBranch, path: '/branches', roles: ['super_admin'] },
+        { title: 'Staff', icon: Users, path: '/staff', roles: ['super_admin'] },
         { title: 'Invoices', icon: FileText, path: '/invoices' },
-    ];
+    ].filter(item => !item.roles || (user && item.roles.includes(user.role)));
 
     return (
         <aside className={`
